@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [unauthorizedMessage, setUnauthorizedMessage] = useState('');
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -89,10 +90,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = (reason = '') => {
     localStorage.removeItem('SESSION_TOKEN');
     setUser(null);
     setError(null);
+    // Always ensure reason is a string
+    const message = typeof reason === 'string' ? reason : '';
+    if (message) {
+      setUnauthorizedMessage(message);
+      // Clear the message after 5 seconds
+      setTimeout(() => setUnauthorizedMessage(''), 5000);
+    }
   };
 
   const updateUser = (updatedUser) => {
@@ -103,6 +111,8 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     error,
+    unauthorizedMessage,
+    setUnauthorizedMessage,
     login,
     register,
     logout,

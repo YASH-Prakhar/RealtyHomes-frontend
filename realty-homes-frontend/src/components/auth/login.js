@@ -11,7 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, unauthorizedMessage } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -90,7 +90,7 @@ const Login = () => {
             />
           </div>
           
-          {error && <div className={styles.error}>{error}</div>}
+          {(error || unauthorizedMessage) && <div className={styles.error}>{error || unauthorizedMessage}</div>}
           
           <button type="submit" disabled={loading} className={styles.submitButton}>
             {loading ? "Signing In..." : "Sign In"}
