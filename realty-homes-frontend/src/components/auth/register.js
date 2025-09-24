@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../../contexts/AuthContext";
 import styles from "../../assets/styles/register.module.css";
 
 const Register = () => {
@@ -20,6 +20,7 @@ const Register = () => {
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,17 +68,11 @@ const Register = () => {
       return;
     }
 
-    try {
-      const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        if (value) formData.append(key, value);
-      });
-
-      await axios.post("http://localhost:5000/api/register", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setSuccess("Registration successful! Please log in.");
+    const result = await register(form);
+    setUploading(false);
+    
+    if (result.success) {
+      setSuccess("Registration successful! Redirecting to dashboard...");
       setForm({
         name: "",
         email: "",
@@ -92,14 +87,16 @@ const Register = () => {
       setPreview(null);
 
       setTimeout(() => {
-        navigate("/login");
+        // Navigate to appropriate dashboard based on role
+        if (result.user?.role === "broker") {
+          navigate("/broker/dashboard");
+        } else {
+          navigate("/user/dashboard");
+        }
       }, 1200);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || err.message || "Registration failed"
-      );
+    } else {
+      setError(result.error);
     }
-    setUploading(false);
   };
 
   return (

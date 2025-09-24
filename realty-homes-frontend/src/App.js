@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import Register from './components/auth/register';
 import Login from './components/auth/login';
 import './App.css';
@@ -10,15 +12,31 @@ import BrokerDashboard from './components/broker/dashboard';
 function App() {
   return (
     <div className="App">
-      <Router>
-        <Routes>
-          {/* <Route path="/" element={<Home />} /> */}
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/user/dashboard" element={<UserDashboard />} />
-          <Route path="/broker/dashboard" element={<BrokerDashboard />} />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* <Route path="/" element={<Home />} /> */}
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route 
+              path="/user/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/broker/dashboard" 
+              element={
+                <ProtectedRoute requiredRole="broker">
+                  <BrokerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </div>
   );
 }

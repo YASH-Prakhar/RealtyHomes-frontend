@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../../contexts/AuthContext";
 import styles from "../../assets/styles/register.module.css";
 
 const Login = () => {
@@ -11,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,24 +32,19 @@ const Login = () => {
       return;
     }
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/login", form, {
-        headers: { "Content-Type": "application/json" },
-      });
-      // Save token or user info as needed
-      localStorage.setItem("SESSION_TOKEN", res.data.token);
-
+    const result = await login(form);
+    setLoading(false);
+    
+    if (result.success) {
       // Navigate based on user role
-      const userRole = res.data.user?.role;
-      setLoading(false);
+      const userRole = result.user?.role;
       if (userRole === "broker") {
         navigate("/broker/dashboard");
       } else {
         navigate("/user/dashboard");
       }
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || "Login failed");
-      setLoading(false);
+    } else {
+      setError(result.error);
     }
   };
 
