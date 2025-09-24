@@ -1,0 +1,262 @@
+/* InquiryForm.module.css */
+
+/* --- Theme vars --- */
+:root{
+    --modal-bg: #ffffff;
+    --muted: #6b7280;
+    --input-bg: #f3f4f6;   /* grey input fill */
+    --tip-bg: #eef6ff;
+    --primary: #0f1724;    /* dark send button */
+    --accent: #2563eb;     /* blue for Tip label */
+  }
+  
+  /* Reset box sizing for predictable widths */
+  *,
+  *::before,
+  *::after { box-sizing: border-box; }
+  
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+  
+  .dialog {
+    width: 100%;
+    max-width: 540px;
+    background: var(--modal-bg);
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 10px 30px rgba(10, 15, 25, 0.18);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: #111827;
+    position: relative;
+  }
+  
+  /* Header */
+  .header {
+    padding-bottom: 6px;
+    text-align: left;   /* left align */
+  }
+  
+  .header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    text-align: left;
+  }
+  
+  .header p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: left;
+  }
+  
+  /* Close button */
+  .closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    color: #374151;
+    padding: 4px;
+  }
+  
+  /* Property info */
+  .propertyInfo {
+    background: #fbfdff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 16px 0;
+    border: 1px solid rgba(15, 23, 36, 0.03);
+    text-align: left;
+  }
+  
+  .propertyInfo h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f1724;
+    text-align: left;
+  }
+  
+  .price {
+    margin: 8px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    text-align: left;
+  }
+  
+  .contact {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    text-align: left;
+  }
+  
+  /* Form */
+  .form {
+    display: block;
+    margin-top: 4px;
+  }
+  
+  .formGroup {
+    margin-bottom: 14px;
+    display: block;
+  }
+  
+  .formGroup label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: #374151;
+    font-weight: 600;
+  }
+  
+  .formGroup input,
+  .formGroup textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: none;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+    resize: vertical;
+  }
+  
+  .formGroup input::placeholder,
+  .formGroup textarea::placeholder {
+    color: #9aa3ad;
+  }
+  
+  .formGroup input:focus,
+  .formGroup textarea:focus {
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+  }
+  
+  /* Name & Email side by side */
+  .form > .formGroup:nth-of-type(1),
+  .form > .formGroup:nth-of-type(2) {
+    float: left;
+    width: calc(50% - 10px);
+  }
+  
+  .form > .formGroup:nth-of-type(1) { margin-right: 20px; }
+  .form > .formGroup:nth-of-type(3) { clear: both; }
+  
+  .form::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  
+  /* Tip box */
+  .tip {
+    background: var(--tip-bg);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #1f2937;
+    border: 1px solid rgba(37,99,235,0.06);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .tip span {
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 36px;
+  }
+  
+  /* Actions (buttons) */
+  .actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;  /* right aligned */
+    margin-top: 6px;
+  }
+  
+  .cancelButton {
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px solid #e6e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #111827;
+    cursor: pointer;
+  }
+  
+  .cancelButton:hover { background: #f8fafc; }
+  
+  .submitButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(2,6,23,0.2);
+  }
+  
+  .submitButton::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'><path d='M22 2L11 13' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M22 2L15 22L11 13L2 9L22 2Z' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+    transform: translateY(-1px);
+  }
+  
+  .submitButton:hover { background: #0b1220; }
+  
+  /* Disclaimer */
+  .disclaimer {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+    text-align: left;
+  }
+  
+  /* Responsive */
+  @media (max-width: 520px) {
+    .dialog { padding: 16px; max-width: 640px; }
+    .form > .formGroup:nth-of-type(1),
+    .form > .formGroup:nth-of-type(2) {
+      float: none;
+      width: 100%;
+      margin-right: 0;
+    }
+    .form > .formGroup:nth-of-type(3) { clear: none; }
+    .actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+  

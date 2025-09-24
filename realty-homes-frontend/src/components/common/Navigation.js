@@ -20,9 +20,10 @@ const Navigation = () => {
     }}>
       <div>
         <span style={{ marginRight: '1rem', fontWeight: 'bold' }}>
-          Welcome, {user?.name?.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+          Realty Homes
         </span>
         <a 
+          
           href={`/${user?.role}/dashboard`} 
           style={{ marginRight: '1rem', textDecoration: 'none', color: '#007bff' }}
         >

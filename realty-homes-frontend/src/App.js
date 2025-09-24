@@ -5,8 +5,9 @@ import Navigation from './components/common/Navigation';
 import Register from './components/auth/register';
 import Login from './components/auth/login';
 import './App.css';
-import UserDashboard from './components/user/dashboard';
-import BrokerDashboard from './components/broker/dashboard';
+import UserDashboard from './components/dashboards/userDashboard';
+import BrokerDashboard from './components/dashboards/brokerDashboard';
+import PropertyDetail from "./components/common/PropertyDetail";
 
 // import Home from './components/Home'; // Uncomment and create Home if needed
 
@@ -37,6 +38,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route path="/property/:id" element={<PropertyDetail />} />
           </Routes>
         </Router>
       </AuthProvider>

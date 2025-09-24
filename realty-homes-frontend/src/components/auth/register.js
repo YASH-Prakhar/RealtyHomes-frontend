@@ -112,7 +112,7 @@ const Register = () => {
         </div>
         
         <h2 className={styles.title}>Create Account</h2>
-        <p className={styles.subtitle}>Join RealEstate Pro to start listing and browsing properties</p>
+        <p className={styles.subtitle}>Join Realty Homes to start listing and browsing properties</p>
         
         <form onSubmit={handleSubmit} className={styles.registerForm}>
           <div className={styles.inputGroup}>
