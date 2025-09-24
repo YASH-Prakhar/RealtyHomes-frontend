@@ -101,115 +101,184 @@ const Register = () => {
 
   return (
     <div className={styles.registerContainer}>
-      <h2>Register for RealtyHomes</h2>
-      <form onSubmit={handleSubmit} className={styles.registerForm}>
-        <label>
-          Name<span style={{ color: "red" }}>*</span>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Email<span style={{ color: "red" }}>*</span>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Password<span style={{ color: "red" }}>*</span>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Phone
-          <input
-            type="tel"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            maxLength={20}
-          />
-        </label>
-        <label>
-          Register As
-          <select name="role" value={form.role} onChange={handleRoleChange}>
-            <option value="user">User</option>
-            <option value="broker">Broker</option>
-          </select>
-        </label>
-        {form.role === "broker" && (
-          <>
-            <label>
-              Agency Name<span style={{ color: "red" }}>*</span>
-              <input
-                type="text"
-                name="agency_name"
-                value={form.agency_name}
-                onChange={handleChange}
-                required={form.role === "broker"}
-              />
+      <div className={styles.registerCard}>
+        <div className={styles.logoContainer}>
+          <div className={styles.logo}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#4285f4" strokeWidth="2" fill="none"/>
+              <polyline points="9,22 9,12 15,12 15,22" stroke="#4285f4" strokeWidth="2" fill="none"/>
+            </svg>
+          </div>
+        </div>
+        
+        <h2 className={styles.title}>Create Account</h2>
+        <p className={styles.subtitle}>Join RealEstate Pro to start listing and browsing properties</p>
+        
+        <form onSubmit={handleSubmit} className={styles.registerForm}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>
+              Full Name<span className={styles.required}>*</span>
             </label>
-            <label>
-              License Number<span style={{ color: "red" }}>*</span>
-              <input
-                type="text"
-                name="license_number"
-                value={form.license_number}
-                onChange={handleChange}
-                required={form.role === "broker"}
-              />
-            </label>
-          </>
-        )}
-        <label>
-          Bio
-          <textarea
-            name="bio"
-            value={form.bio}
-            onChange={handleChange}
-            rows={3}
-          />
-        </label>
-        <label>
-          Profile Image
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            disabled={uploading}
-          />
-          {preview && (
-            <img
-              src={preview}
-              alt="Profile Preview"
-              style={{
-                width: 80,
-                height: 80,
-                marginTop: 8,
-                borderRadius: "50%",
-              }}
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+              className={styles.input}
+              required
             />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>
+              Email<span className={styles.required}>*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              className={styles.input}
+              required
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>
+              Password<span className={styles.required}>*</span>
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Create a password"
+              className={styles.input}
+              required
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Phone</label>
+            <input
+              type="tel"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="Enter your phone number"
+              className={styles.input}
+              maxLength={20}
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Account Type</label>
+            <div className={styles.radioGroup}>
+              <label className={styles.radioOption}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="user"
+                  checked={form.role === "user"}
+                  onChange={handleRoleChange}
+                  className={styles.radioInput}
+                />
+                <span className={styles.radioLabel}>Regular User</span>
+              </label>
+              <label className={styles.radioOption}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="broker"
+                  checked={form.role === "broker"}
+                  onChange={handleRoleChange}
+                  className={styles.radioInput}
+                />
+                <span className={styles.radioLabel}>Broker</span>
+              </label>
+            </div>
+          </div>
+
+          {form.role === "broker" && (
+            <>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>
+                  Agency Name<span className={styles.required}>*</span>
+                </label>
+                <input
+                  type="text"
+                  name="agency_name"
+                  value={form.agency_name}
+                  onChange={handleChange}
+                  placeholder="Enter your agency name"
+                  className={styles.input}
+                  required={form.role === "broker"}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>
+                  License Number<span className={styles.required}>*</span>
+                </label>
+                <input
+                  type="text"
+                  name="license_number"
+                  value={form.license_number}
+                  onChange={handleChange}
+                  placeholder="Enter your license number"
+                  className={styles.input}
+                  required={form.role === "broker"}
+                />
+              </div>
+            </>
           )}
-        </label>
-        {error && <div className={styles.error}>{error}</div>}
-        {success && <div className={styles.success}>{success}</div>}
-        <button type="submit" disabled={uploading}>
-          {uploading ? "Registering..." : "Register"}
-        </button>
-      </form>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Bio</label>
+            <textarea
+              name="bio"
+              value={form.bio}
+              onChange={handleChange}
+              placeholder="Tell us about yourself"
+              className={styles.textarea}
+              rows={3}
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Profile Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={uploading}
+              className={styles.fileInput}
+            />
+            {preview && (
+              <div className={styles.imagePreview}>
+                <img
+                  src={preview}
+                  alt="Profile Preview"
+                  className={styles.previewImage}
+                />
+              </div>
+            )}
+          </div>
+
+          {error && <div className={styles.error}>{error}</div>}
+          {success && <div className={styles.success}>{success}</div>}
+          
+          <button type="submit" disabled={uploading} className={styles.submitButton}>
+            {uploading ? "Creating Account..." : "Create Account"}
+          </button>
+        </form>
+        
+        <div className={styles.signinLink}>
+          Already have an account? <a href="/login">Sign in</a>
+        </div>
+      </div>
     </div>
   );
 };
