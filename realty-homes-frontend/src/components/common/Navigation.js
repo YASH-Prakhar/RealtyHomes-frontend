@@ -20,7 +20,7 @@ const Navigation = () => {
     }}>
       <div>
         <span style={{ marginRight: '1rem', fontWeight: 'bold' }}>
-          Welcome, {user?.name} ({user?.role})
+          Welcome, {user?.name?.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
         </span>
         <a 
           href={`/${user?.role}/dashboard`} 
