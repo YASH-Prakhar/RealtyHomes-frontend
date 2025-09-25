@@ -4,16 +4,17 @@ import PropertyListingForm from "../common/PropertyListingForm";
 import styles from "../../assets/styles/userDashboard.module.css";
 import PropertyCard from "../common/PropertyCard";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Add axios import
+import axios from "axios";
 
 const UserDashboard = () => {
   const { user } = useAuth();
   const [isListingFormOpen, setIsListingFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [myListedProperties, setMyListedProperties] = useState([]); // State for user's properties
-  const [fetchError, setFetchError] = useState(null); // State for error handling
-  const [inquiries, setInquiries] = useState([]); // State for inquiries
-  const [inquiryError, setInquiryError] = useState(null); // State for inquiry error handling
+  const [myListedProperties, setMyListedProperties] = useState([]);
+  const [fetchError, setFetchError] = useState(null);
+  const [inquiries, setInquiries] = useState([]);
+  const [inquiryError, setInquiryError] = useState(null);
+  const [propertyNames, setPropertyNames] = useState({}); // State to store property names
   const navigate = useNavigate();
 
   // Fetch user's properties and inquiries when component mounts
@@ -32,11 +33,11 @@ const UserDashboard = () => {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            user_id: user.id, // Send user ID as a query parameter
+            user_id: user.id,
           },
         }
       );
-      console.log("Fetched properties by You:", response.data); // Debug log
+      console.log("Fetched properties:", response.data);
       setMyListedProperties(response.data.properties || []);
     } catch (error) {
       console.error("Error fetching user properties:", error);
@@ -54,29 +55,55 @@ const UserDashboard = () => {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            user_id: user.id, // Send user ID as a query parameter
+            user_id: user.id,
           },
         }
       );
-      console.log("Fetched inquiries:", response.data); // Debug log
+      console.log("Fetched inquiries:", response.data);
       setInquiries(response.data.inquiries || []);
+      fetchPropertyNames(response.data.inquiries); // Fetch property names based on inquiries
     } catch (error) {
       console.error("Error fetching user inquiries:", error);
       setInquiryError("Failed to load your inquiries");
     }
   };
 
+  const fetchPropertyNames = async (inquiries) => {
+    const token = localStorage.getItem("SESSION_TOKEN");
+    const propertyIds = inquiries.map((inquiry) => inquiry.property_id);
+    const uniquePropertyIds = [...new Set(propertyIds)];
+
+    try {
+      const responses = await Promise.all(
+        uniquePropertyIds.map((id) =>
+          axios.get(`http://localhost:5000/api/properties/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        )
+      );
+      
+      const names = {};
+      responses.forEach((response) => {
+        names[response.data.property.id] = response.data.property.title; // Assuming the response structure
+      });
+      console.log("Fetched property names:", names);
+      setPropertyNames(names);
+    } catch (error) {
+      console.error("Error fetching property names:", error);
+    }
+  };
+
   const handlePropertySubmit = async (propertyData) => {
     setIsLoading(true);
-    const token = localStorage.getItem("SESSION_TOKEN"); // Get token from localStorage
-    console.log("Submitting property data:", propertyData); // Debug log
+    const token = localStorage.getItem("SESSION_TOKEN");
 
     const formData = new FormData();
-
     for (const key in propertyData) {
       if (key === "images") {
         propertyData.images.forEach((file) => {
-          formData.append("images", file); // field name must match backend
+          formData.append("images", file);
         });
       } else if (key === "features") {
         formData.append("features", JSON.stringify(propertyData.features));
@@ -95,9 +122,8 @@ const UserDashboard = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
       alert("Property listed successfully!");
-      fetchUserProperties(); // Refresh the properties list after submission
+      fetchUserProperties();
     } catch (error) {
       console.error("Error creating property:", error);
       alert("Failed to list the property. Please try again.");
@@ -212,14 +238,14 @@ const UserDashboard = () => {
                   bedrooms: property.bedrooms,
                   bathrooms: property.bathrooms,
                   area: `${property.area_sqft} sq ft`,
-                  image: property.images[0], // Ensure this is the correct image URL
+                  image: property.images[0],
                   type: property.property_type,
                   status: property.status,
-                  listedDate: formatDate(property.created_at), // Format this if needed
+                  listedDate: formatDate(property.created_at),
                   features: property.features,
                 }}
                 showOwner={false}
-                onClick={() => handlePropertyClick(property.id)} // Pass the click handler
+                onClick={() => handlePropertyClick(property.id)}
               />
             ))
           )}
@@ -230,7 +256,7 @@ const UserDashboard = () => {
       <div className={styles.inquiriesSection}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Recent Inquiries</h2>
-          <button className={styles.viewAllBtn}>View All</button>
+          
         </div>
 
         <div className={styles.inquiriesList}>
@@ -246,10 +272,18 @@ const UserDashboard = () => {
                 <div className={styles.inquiryContent}>
                   <div className={styles.inquiryHeader}>
                     <h4 className={styles.inquirerName}>{inquiry.name}</h4>
-                    <span className={styles.inquiryDate}>{inquiry.date}</span>
+                    <span className={styles.inquiryDate}>
+                      {formatDate(inquiry.created_at)}
+                    </span>
                   </div>
-                  <p className={styles.inquiryProperty}>{inquiry.property}</p>
+                  <p className={styles.inquiryProperty}>
+                    Property:{" "}
+                    {propertyNames[inquiry.property_id] || "Loading..."}
+                  </p>
                   <p className={styles.inquiryMessage}>{inquiry.message}</p>
+                  <p className={styles.inquiryContact}>
+                    Email: {inquiry.email} | Phone: {inquiry.phone}
+                  </p>
                 </div>
               </div>
             ))
