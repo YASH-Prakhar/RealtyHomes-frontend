@@ -1,34 +1,83 @@
-import React from 'react';
-import styles from '../../assets/styles/InquiryForm.module.css';
+import React, { useState } from "react";
+import axios from "axios";
+import styles from "../../assets/styles/InquiryForm.module.css";
 
 const InquiryForm = ({ isOpen, onClose, property }) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    onClose();
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
 
-  const handleInquirySent = () => {
-    alert('Inquiry sent successfully!');
-    console.log('Inquiry details sent for property:', property);
-    onClose();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("SESSION_TOKEN");
+      await axios.post(
+        "http://localhost:5000/api/inquiries",
+        {
+          ...formData,
+          property_id: property.id,
+          owner_id: property.owner_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Inquiry sent successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send inquiry");
+      console.error("Error sending inquiry:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Get owner name safely
+  const ownerName = property?.owner_name || "Owner";
 
   return (
     <div className={styles.overlay}>
       <div className={styles.dialog}>
         <div className={styles.header}>
-          <button className={styles.closeButton} onClick={onClose}>×</button>
+          <button className={styles.closeButton} onClick={onClose}>
+            ×
+          </button>
           <h2>Send Inquiry</h2>
-          <p>Contact {property?.owner || 'Owner'} about this property</p>
+          <p>Contact {ownerName} about this property</p>
         </div>
 
         <div className={styles.propertyInfo}>
           <h3>{property?.title}</h3>
-          <p className={styles.price}>{property?.price}</p>
-          <p className={styles.contact}>Contact: {property?.owner}</p>
+          <p className={styles.price}>${property?.price?.toLocaleString()}</p>
+          <p className={styles.contact}>Contact: {ownerName}</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -37,6 +86,8 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
             <input
               type="text"
               id="name"
+              value={formData.name}
+              onChange={handleChange}
               placeholder="Jane User"
               required
             />
@@ -47,6 +98,8 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
             <input
               type="email"
               id="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="user@example.com"
               required
             />
@@ -57,6 +110,8 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
             <input
               type="tel"
               id="phone"
+              value={formData.phone}
+              onChange={handleChange}
               placeholder="(555) 123-4567"
             />
           </div>
@@ -66,28 +121,42 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
             <textarea
               id="message"
               rows="4"
+              value={formData.message}
+              onChange={handleChange}
               required
               placeholder={`Hi, I'm interested in your property "${property?.title}". Could you please provide more information?`}
             ></textarea>
           </div>
 
+          {error && <div className={styles.error}>{error}</div>}
+
           <div className={styles.tip}>
-            <span>Tip:</span> Include specific questions about the property to get
-            a faster response from {property?.owner}.
+            <span>Tip:</span> Include specific questions about the property to
+            get a faster response from {ownerName}.
           </div>
 
           <div className={styles.actions}>
-            <button type="button" onClick={onClose} className={styles.cancelButton}>
+            <button
+              type="button"
+              onClick={onClose}
+              className={styles.cancelButton}
+              disabled={loading}
+            >
               Cancel
             </button>
-            <button onClick={handleInquirySent} type="submit" className={styles.submitButton}>
-              Send Inquiry
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={loading}
+            >
+              {loading ? "Sending..." : "Send Inquiry"}
             </button>
           </div>
 
           <p className={styles.disclaimer}>
-            Your contact information will be shared with the property owner/broker. 
-            By sending this inquiry, you agree to be contacted about this property.
+            Your contact information will be shared with the property
+            owner/broker. By sending this inquiry, you agree to be contacted
+            about this property.
           </p>
         </form>
       </div>

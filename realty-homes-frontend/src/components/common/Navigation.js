@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 const Navigation = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -22,13 +22,18 @@ const Navigation = () => {
         <span style={{ marginRight: '1rem', fontWeight: 'bold' }}>
           Realty Homes
         </span>
-        <a 
-          
-          href={`/${user?.role}/dashboard`} 
+        <Link
+          to={`/${user?.role}/dashboard`}
           style={{ marginRight: '1rem', textDecoration: 'none', color: '#007bff' }}
         >
           Dashboard
-        </a>
+        </Link>
+        <Link
+          to="/properties"
+          style={{ marginRight: '1rem', textDecoration: 'none', color: '#007bff' }}
+        >
+          Properties
+        </Link>
       </div>
       <button 
         onClick={(e) => {

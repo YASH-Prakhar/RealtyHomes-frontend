@@ -8,6 +8,7 @@ import './App.css';
 import UserDashboard from './components/dashboards/userDashboard';
 import BrokerDashboard from './components/dashboards/brokerDashboard';
 import PropertyDetail from "./components/common/PropertyDetail";
+import PropertyDashboard from './components/dashboards/propertyDashboard';
 
 // import Home from './components/Home'; // Uncomment and create Home if needed
 
@@ -38,6 +39,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route path="/properties" element={<PropertyDashboard />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
           </Routes>
         </Router>

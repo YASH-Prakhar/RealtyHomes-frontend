@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { myProperties, savedProperties, inquiries } from "../../constants/propertyData";
+import {
+  myProperties,
+  savedProperties,
+  inquiries,
+} from "../../constants/propertyData";
 import PropertyListingForm from "../common/PropertyListingForm";
 import styles from "../../assets/styles/userDashboard.module.css";
 import PropertyCard from "../common/PropertyCard";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Add axios import
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -13,14 +18,41 @@ const UserDashboard = () => {
   const navigate = useNavigate();
 
   const handlePropertySubmit = async (propertyData) => {
+    
     setIsLoading(true);
+    
+    const token = localStorage.getItem("SESSION_TOKEN"); // Get token from localStorage
+    console.log("Submitting property data:", propertyData); // Debug log
+    
+    const formData = new FormData();
+    
+    for (const key in propertyData) {
+      if (key === "images") {
+        propertyData.images.forEach((file) => {
+          formData.append("images", file); // field name must match backend
+        });
+      } else if (key === "features") {
+        formData.append("features", JSON.stringify(propertyData.features));
+      } else if (propertyData[key] !== undefined && propertyData[key] !== null) {
+        formData.append(key, propertyData[key]);
+      }
+    }
+    
     try {
-      console.log("Creating property:", propertyData);
+      
+      await axios.post("http://localhost:5000/api/properties", formData, {
+        headers: { 
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+         },
+      });
+      
       alert("Property listed successfully!");
-      // Optionally, update the myProperties list dynamically here
+
     } catch (error) {
       console.error("Error creating property:", error);
       alert("Failed to list the property. Please try again.");
+
     } finally {
       setIsLoading(false);
       setIsListingFormOpen(false);
@@ -36,30 +68,58 @@ const UserDashboard = () => {
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <h1 className={styles.welcomeTitle}>Welcome back, {user?.name || 'Jane User'}!</h1>
-          <p className={styles.welcomeSubtitle}>Manage your properties and track your real estate activities</p>
+          <h1 className={styles.welcomeTitle}>
+            Welcome back, {user?.name || "Jane User"}!
+          </h1>
+          <p className={styles.welcomeSubtitle}>
+            Manage your properties and track your real estate activities
+          </p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className={styles.statsContainer}>
+      {/* <div className={styles.statsContainer}>
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="#374151" strokeWidth="2" fill="none"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                stroke="#374151"
+                strokeWidth="2"
+                fill="none"
+              />
             </svg>
           </div>
           <div>
             <h3 className={styles.statTitle}>My Properties</h3>
-            <div className={styles.statNumber}>1<span className={styles.statUnit}>/5</span></div>
+            <div className={styles.statNumber}>
+              1<span className={styles.statUnit}>/5</span>
+            </div>
             <p className={styles.statSubtext}>4 remaining</p>
           </div>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="#374151" strokeWidth="2" fill="none"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                stroke="#374151"
+                strokeWidth="2"
+                fill="none"
+              />
             </svg>
           </div>
           <div>
@@ -71,8 +131,19 @@ const UserDashboard = () => {
 
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#374151" strokeWidth="2" fill="none"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                stroke="#374151"
+                strokeWidth="2"
+                fill="none"
+              />
             </svg>
           </div>
           <div>
@@ -81,13 +152,15 @@ const UserDashboard = () => {
             <p className={styles.statSubtext}>New messages</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Quick Actions */}
       <div className={styles.quickActionsContainer}>
         <h2 className={styles.sectionTitle}>Quick Actions</h2>
-        <p className={styles.sectionSubtitle}>Manage your real estate activities</p>
-        
+        <p className={styles.sectionSubtitle}>
+          Manage your real estate activities
+        </p>
+
         <div className={styles.quickActions}>
           <button
             className={styles.primaryAction}
@@ -96,11 +169,24 @@ const UserDashboard = () => {
           >
             {isLoading ? "Loading..." : "List New Property"}
           </button>
-          
+
           <button className={styles.secondaryAction}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="11" cy="11" r="8" stroke="#374151" strokeWidth="2" fill="none"/>
-              <path d="m21 21-4.35-4.35" stroke="#374151" strokeWidth="2"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+                stroke="#374151"
+                strokeWidth="2"
+                fill="none"
+              />
+              <path d="m21 21-4.35-4.35" stroke="#374151" strokeWidth="2" />
             </svg>
             Browse Properties
           </button>
@@ -120,7 +206,7 @@ const UserDashboard = () => {
           <h2 className={styles.sectionTitle}>My Properties</h2>
           <button className={styles.viewAllBtn}>View All</button>
         </div>
-        
+
         <div className={styles.propertiesGrid}>
           {myProperties.map((property) => (
             <PropertyCard
@@ -139,10 +225,14 @@ const UserDashboard = () => {
           <h2 className={styles.sectionTitle}>Saved Properties</h2>
           <button className={styles.viewAllBtn}>View All</button>
         </div>
-        
+
         <div className={styles.propertiesGrid}>
           {savedProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} showOwner={true} />
+            <PropertyCard
+              key={property.id}
+              property={property}
+              showOwner={true}
+            />
           ))}
         </div>
       </div>
@@ -153,7 +243,7 @@ const UserDashboard = () => {
           <h2 className={styles.sectionTitle}>Recent Inquiries</h2>
           <button className={styles.viewAllBtn}>View All</button>
         </div>
-        
+
         <div className={styles.inquiriesList}>
           {inquiries.map((inquiry) => (
             <div key={inquiry.id} className={styles.inquiryItem}>
