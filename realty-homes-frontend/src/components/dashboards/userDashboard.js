@@ -111,6 +111,14 @@ const UserDashboard = () => {
     navigate(`/property/${propertyId}`);
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className={styles.dashboard}>
       {/* Header */}
@@ -195,7 +203,21 @@ const UserDashboard = () => {
             myListedProperties.map((property) => (
               <PropertyCard
                 key={property.id}
-                property={property}
+                property={{
+                  id: property.id,
+                  title: property.title,
+                  description: property.description,
+                  price: property.price,
+                  location: property.location,
+                  bedrooms: property.bedrooms,
+                  bathrooms: property.bathrooms,
+                  area: `${property.area_sqft} sq ft`,
+                  image: property.images[0], // Ensure this is the correct image URL
+                  type: property.property_type,
+                  status: property.status,
+                  listedDate: formatDate(property.created_at), // Format this if needed
+                  features: property.features,
+                }}
                 showOwner={false}
                 onClick={() => handlePropertyClick(property.id)} // Pass the click handler
               />
