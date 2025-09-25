@@ -1,10 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import {
-  myProperties,
-  savedProperties,
-  inquiries,
-} from "../../constants/propertyData";
 import PropertyListingForm from "../common/PropertyListingForm";
 import styles from "../../assets/styles/userDashboard.module.css";
 import PropertyCard from "../common/PropertyCard";
@@ -15,17 +10,69 @@ const UserDashboard = () => {
   const { user } = useAuth();
   const [isListingFormOpen, setIsListingFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [myListedProperties, setMyListedProperties] = useState([]); // State for user's properties
+  const [fetchError, setFetchError] = useState(null); // State for error handling
+  const [inquiries, setInquiries] = useState([]); // State for inquiries
+  const [inquiryError, setInquiryError] = useState(null); // State for inquiry error handling
   const navigate = useNavigate();
 
+  // Fetch user's properties and inquiries when component mounts
+  useEffect(() => {
+    fetchUserProperties();
+    fetchUserInquiries();
+  }, []);
+
+  const fetchUserProperties = async () => {
+    try {
+      const token = localStorage.getItem("SESSION_TOKEN");
+      const response = await axios.get(
+        "http://localhost:5000/api/properties/my-properties",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            user_id: user.id, // Send user ID as a query parameter
+          },
+        }
+      );
+      console.log("Fetched properties by You:", response.data); // Debug log
+      setMyListedProperties(response.data.properties || []);
+    } catch (error) {
+      console.error("Error fetching user properties:", error);
+      setFetchError("Failed to load your properties");
+    }
+  };
+
+  const fetchUserInquiries = async () => {
+    try {
+      const token = localStorage.getItem("SESSION_TOKEN");
+      const response = await axios.get(
+        "http://localhost:5000/api/inquiries/my-inquiries",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            user_id: user.id, // Send user ID as a query parameter
+          },
+        }
+      );
+      console.log("Fetched inquiries:", response.data); // Debug log
+      setInquiries(response.data.inquiries || []);
+    } catch (error) {
+      console.error("Error fetching user inquiries:", error);
+      setInquiryError("Failed to load your inquiries");
+    }
+  };
+
   const handlePropertySubmit = async (propertyData) => {
-    
     setIsLoading(true);
-    
     const token = localStorage.getItem("SESSION_TOKEN"); // Get token from localStorage
     console.log("Submitting property data:", propertyData); // Debug log
-    
+
     const formData = new FormData();
-    
+
     for (const key in propertyData) {
       if (key === "images") {
         propertyData.images.forEach((file) => {
@@ -33,26 +80,27 @@ const UserDashboard = () => {
         });
       } else if (key === "features") {
         formData.append("features", JSON.stringify(propertyData.features));
-      } else if (propertyData[key] !== undefined && propertyData[key] !== null) {
+      } else if (
+        propertyData[key] !== undefined &&
+        propertyData[key] !== null
+      ) {
         formData.append(key, propertyData[key]);
       }
     }
-    
+
     try {
-      
       await axios.post("http://localhost:5000/api/properties", formData, {
-        headers: { 
+        headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
-         },
+        },
       });
-      
-      alert("Property listed successfully!");
 
+      alert("Property listed successfully!");
+      fetchUserProperties(); // Refresh the properties list after submission
     } catch (error) {
       console.error("Error creating property:", error);
       alert("Failed to list the property. Please try again.");
-
     } finally {
       setIsLoading(false);
       setIsListingFormOpen(false);
@@ -76,83 +124,6 @@ const UserDashboard = () => {
           </p>
         </div>
       </div>
-
-      {/* Stats Cards */}
-      {/* <div className={styles.statsContainer}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-                stroke="#374151"
-                strokeWidth="2"
-                fill="none"
-              />
-            </svg>
-          </div>
-          <div>
-            <h3 className={styles.statTitle}>My Properties</h3>
-            <div className={styles.statNumber}>
-              1<span className={styles.statUnit}>/5</span>
-            </div>
-            <p className={styles.statSubtext}>4 remaining</p>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                stroke="#374151"
-                strokeWidth="2"
-                fill="none"
-              />
-            </svg>
-          </div>
-          <div>
-            <h3 className={styles.statTitle}>Saved Properties</h3>
-            <div className={styles.statNumber}>2</div>
-            <p className={styles.statSubtext}>Favorited listings</p>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                stroke="#374151"
-                strokeWidth="2"
-                fill="none"
-              />
-            </svg>
-          </div>
-          <div>
-            <h3 className={styles.statTitle}>Inquiries</h3>
-            <div className={styles.statNumber}>1</div>
-            <p className={styles.statSubtext}>New messages</p>
-          </div>
-        </div>
-      </div> */}
 
       {/* Quick Actions */}
       <div className={styles.quickActionsContainer}>
@@ -208,32 +179,28 @@ const UserDashboard = () => {
         </div>
 
         <div className={styles.propertiesGrid}>
-          {myProperties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              showOwner={false}
-              onClick={() => handlePropertyClick(property.id)} // Pass the click handler
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Saved Properties Section */}
-      <div className={styles.propertiesSection}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Saved Properties</h2>
-          <button className={styles.viewAllBtn}>View All</button>
-        </div>
-
-        <div className={styles.propertiesGrid}>
-          {savedProperties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              showOwner={true}
-            />
-          ))}
+          {fetchError ? (
+            <div className={styles.error}>{fetchError}</div>
+          ) : myListedProperties.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>You haven't listed any properties yet.</p>
+              <button
+                className={styles.primaryAction}
+                onClick={() => setIsListingFormOpen(true)}
+              >
+                List Your First Property
+              </button>
+            </div>
+          ) : (
+            myListedProperties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                showOwner={false}
+                onClick={() => handlePropertyClick(property.id)} // Pass the click handler
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -245,18 +212,26 @@ const UserDashboard = () => {
         </div>
 
         <div className={styles.inquiriesList}>
-          {inquiries.map((inquiry) => (
-            <div key={inquiry.id} className={styles.inquiryItem}>
-              <div className={styles.inquiryContent}>
-                <div className={styles.inquiryHeader}>
-                  <h4 className={styles.inquirerName}>{inquiry.name}</h4>
-                  <span className={styles.inquiryDate}>{inquiry.date}</span>
-                </div>
-                <p className={styles.inquiryProperty}>{inquiry.property}</p>
-                <p className={styles.inquiryMessage}>{inquiry.message}</p>
-              </div>
+          {inquiryError ? (
+            <div className={styles.error}>{inquiryError}</div>
+          ) : inquiries.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No inquiries received yet.</p>
             </div>
-          ))}
+          ) : (
+            inquiries.map((inquiry) => (
+              <div key={inquiry.id} className={styles.inquiryItem}>
+                <div className={styles.inquiryContent}>
+                  <div className={styles.inquiryHeader}>
+                    <h4 className={styles.inquirerName}>{inquiry.name}</h4>
+                    <span className={styles.inquiryDate}>{inquiry.date}</span>
+                  </div>
+                  <p className={styles.inquiryProperty}>{inquiry.property}</p>
+                  <p className={styles.inquiryMessage}>{inquiry.message}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
