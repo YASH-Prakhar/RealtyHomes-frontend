@@ -86,6 +86,7 @@ const PropertyDetail = () => {
               <span className={styles.ownerName}>
                 {property.owner_name || "Owner"}
               </span>
+              
             </div>
             <button
               className={styles.inquiryButton}

@@ -11,8 +11,6 @@ const PropertyDashboard = () => {
   const [filters, setFilters] = useState({
     location: "",
     propertyType: "all",
-    minPrice: 0,
-    maxPrice: 2000000,
     bedrooms: "any",
     bathrooms: "any",
     minArea: 0,
@@ -34,7 +32,6 @@ const PropertyDashboard = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       console.log("Fetched properties:", response.data);
-      // Access the properties array from response.data
       setProperties(
         Array.isArray(response.data.properties) ? response.data.properties : []
       );
@@ -62,8 +59,6 @@ const PropertyDashboard = () => {
           .includes(filters.location.toLowerCase())) &&
       (filters.propertyType === "all" ||
         property.property_type === filters.propertyType) &&
-      property.price >= filters.minPrice &&
-      property.price <= filters.maxPrice &&
       (filters.bedrooms === "any" ||
         property.bedrooms >= parseInt(filters.bedrooms)) &&
       (filters.bathrooms === "any" ||
@@ -152,7 +147,8 @@ const PropertyDashboard = () => {
           </select>
         </div>
 
-        <div className={styles.filterSection}>
+        {/* Removed Price Range Filter */}
+        {/* <div className={styles.filterSection}>
           <label>Price Range</label>
           <div className={styles.priceInputs}>
             <input
@@ -170,7 +166,7 @@ const PropertyDashboard = () => {
               onChange={handleFilterChange}
             />
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.filterSection}>
           <label>Bedrooms</label>

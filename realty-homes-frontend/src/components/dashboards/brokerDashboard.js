@@ -116,6 +116,23 @@ const BrokerDashboard = () => {
       </svg>
     );
   };
+  
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className={styles.dashboard}>
@@ -355,7 +372,24 @@ const BrokerDashboard = () => {
 
           <div className={styles.propertiesGrid}>
             {brokerProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCard
+                key={property.id}
+                property={{
+                  id: property.id,
+                  title: property.title,
+                  description: property.description,
+                  price: formatPrice(property.price),
+                  location: property.location,
+                  bedrooms: property.bedrooms,
+                  bathrooms: property.bathrooms,
+                  area: `${property.area_sqft} sq ft`,
+                  image: property.images[0], // Assuming images is an array
+                  type: property.property_type,
+                  status: property.status,
+                  listedDate: formatDate(property.created_at),
+                  features: property.features,
+                }}
+              />
             ))}
           </div>
         </div>
@@ -363,7 +397,7 @@ const BrokerDashboard = () => {
         {/* Sidebar */}
         <div className={styles.sidebar}>
           {/* Recent Activity */}
-          <div className={styles.activitySection}>
+          {/* <div className={styles.activitySection}>
             <h3 className={styles.sidebarTitle}>Recent Activity</h3>
             <div className={styles.activityList}>
               {recentActivity.map((activity) => (
@@ -381,7 +415,7 @@ const BrokerDashboard = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Recent Inquiries */}
           <div className={styles.inquiriesSection}>
