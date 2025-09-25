@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useDispatch } from "react-redux"; // Import useDispatch
+import { addInquiry } from "../../features/inquirySlice"; // Import the addInquiry thunk
 import styles from "../../assets/styles/InquiryForm.module.css";
 
 const InquiryForm = ({ isOpen, onClose, property }) => {
+  const dispatch = useDispatch(); // Initialize dispatch
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,22 +30,12 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
     setError(null);
 
     try {
-      const token = localStorage.getItem("SESSION_TOKEN");
-      await axios.post(
-        "http://localhost:5000/api/inquiries",
-        {
-          ...formData,
-          property_id: property.id,
-          owner_id: property.owner_id,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const inquiryData = {
+        ...formData,
+        property_id: property.id,
+        owner_id: property.owner_id,
+      };
+      await dispatch(addInquiry(inquiryData)); // Dispatch the addInquiry thunk
       alert("Inquiry sent successfully!");
       setFormData({
         name: "",
@@ -53,7 +45,7 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
       });
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send inquiry");
+      setError(err.message || "Failed to send inquiry");
       console.error("Error sending inquiry:", err);
     } finally {
       setLoading(false);

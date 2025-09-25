@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux"; 
+import { fetchInquiries } from "../../features/inquirySlice"; 
 import {
   brokerProfile,
-  recentInquiries,
   monthlyStats,
-  statsChanges,
 } from "../../constants/brokerData";
 import styles from "../../assets/styles/brokerDashboard.module.css";
 import PropertyCard from "../common/PropertyCard";
-import PropertyListingForm from "../common/PropertyListingForm"; // Import the form
+import PropertyListingForm from "../common/PropertyListingForm"; 
 import axios from "axios";
 
 const BrokerDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate(); // Initialize navigate
-  const [isListingFormOpen, setIsListingFormOpen] = useState(false); // State to control form visibility
-  const [isLoading, setIsLoading] = useState(false); // State to handle loading
-  const [brokerProperties, setBrokerProperties] = useState([]); // State to store broker's properties
-  const [fetchError, setFetchError] = useState(null); // State to handle fetch errors
+  const navigate = useNavigate();
+  const dispatch = useDispatch(); 
+  const inquiries = useSelector((state) => state.inquiries.inquiries); 
+  const loading = useSelector((state) => state.inquiries.loading); 
+  const error = useSelector((state) => state.inquiries.error); 
+  const [isListingFormOpen, setIsListingFormOpen] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false); 
+  const [brokerProperties, setBrokerProperties] = useState([]); 
+  const [fetchError, setFetchError] = useState(null); 
 
-  useEffect(() => {
-    fetchBrokerProperties(); // Fetch properties when component mounts
-  }, []);
-
-  const fetchBrokerProperties = async () => {
+  const fetchBrokerProperties = useCallback(async () => {
     try {
       const token = localStorage.getItem("SESSION_TOKEN");
       const response = await axios.get(
@@ -38,12 +38,24 @@ const BrokerDashboard = () => {
           },
         }
       );
+      console.log("Fetched broker properties:", response.data.properties);
       setBrokerProperties(response.data.properties || []);
     } catch (error) {
       console.error("Error fetching broker properties:", error);
       setFetchError("Failed to load properties");
     }
-  };
+  }, [user.id]);
+
+  // Fetch broker properties
+  useEffect(() => {
+    fetchBrokerProperties(); 
+    dispatch(fetchInquiries(user.id)); 
+  }, [dispatch, user.id, fetchBrokerProperties]); 
+
+  // Calculate dynamic values
+  const totalProperties = brokerProperties.length;
+  const totalPortfolioValue = brokerProperties.reduce((total, property) => total + parseFloat(property.price), 0); // Convert price to float
+  const newInquiries = inquiries.length;
 
   const handlePropertyClick = (propertyId) => {
     navigate(`/property/${propertyId}`); // Navigate to the property detail page
@@ -145,16 +157,8 @@ const BrokerDashboard = () => {
             <span className={styles.statTitle}>Total Properties</span>
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statNumber}>
-              {brokerProfile.totalProperties}
-            </div>
+            <div className={styles.statNumber}>{totalProperties}</div>
             <div className={styles.statMeta}>
-              <span className={styles.statSubtext}>
-                {brokerProfile.activeListings} active listings
-              </span>
-              <span className={styles.statChange}>
-                {statsChanges.totalProperties}
-              </span>
             </div>
           </div>
         </div>
@@ -176,14 +180,11 @@ const BrokerDashboard = () => {
           </div>
           <div className={styles.statContent}>
             <div className={styles.statNumber}>
-              {brokerProfile.portfolioValue}
+              {formatPrice(totalPortfolioValue)} {/* Format the total portfolio value */}
             </div>
             <div className={styles.statMeta}>
               <span className={styles.statSubtext}>
-                Avg. {brokerProfile.avgPropertyValue}
-              </span>
-              <span className={styles.statChange}>
-                {statsChanges.portfolioValue}
+                Avg. {formatPrice(totalPortfolioValue / totalProperties || 0)} {/* Average property value */}
               </span>
             </div>
           </div>
@@ -210,47 +211,8 @@ const BrokerDashboard = () => {
             <span className={styles.statTitle}>New Inquiries</span>
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statNumber}>
-              {brokerProfile.newInquiries}
-            </div>
+            <div className={styles.statNumber}>{newInquiries}</div>
             <div className={styles.statMeta}>
-              <span className={styles.statSubtext}>This week</span>
-              <span className={styles.statChange}>
-                {statsChanges.newInquiries}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <div className={styles.statIcon}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                  stroke="#eab308"
-                  strokeWidth="2"
-                  fill="none"
-                />
-              </svg>
-            </div>
-            <span className={styles.statTitle}>Agency Rating</span>
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>{brokerProfile.rating}</div>
-            <div className={styles.statMeta}>
-              <span className={styles.statSubtext}>
-                From {brokerProfile.reviewsCount} reviews
-              </span>
-              <span className={styles.statChange}>
-                {statsChanges.agencyRating}
-              </span>
             </div>
           </div>
         </div>
@@ -266,7 +228,7 @@ const BrokerDashboard = () => {
         <div className={styles.brokerTools}>
           <button
             className={styles.primaryTool}
-            onClick={() => setIsListingFormOpen(true)} // Open the form
+            onClick={() => setIsListingFormOpen(true)} 
             disabled={isLoading}
           >
             {isLoading ? "Loading..." : "List New Property"}
@@ -381,7 +343,6 @@ const BrokerDashboard = () => {
 
         {/* Sidebar */}
         <div className={styles.sidebar}>
-
           {/* Recent Inquiries */}
           <div className={styles.inquiriesSection}>
             <div className={styles.sidebarHeader}>
@@ -389,18 +350,32 @@ const BrokerDashboard = () => {
               <button className={styles.viewAllBtn}>View All</button>
             </div>
             <div className={styles.inquiriesList}>
-              {recentInquiries.map((inquiry) => (
-                <div key={inquiry.id} className={styles.inquiryItem}>
-                  <div className={styles.inquiryContent}>
-                    <div className={styles.inquiryHeader}>
-                      <h4 className={styles.inquirerName}>{inquiry.name}</h4>
-                      <span className={styles.inquiryDate}>{inquiry.date}</span>
-                    </div>
-                    <p className={styles.inquiryProperty}>{inquiry.property}</p>
-                    <p className={styles.inquiryMessage}>{inquiry.message}</p>
-                  </div>
+              {loading ? (
+                <div>Loading inquiries...</div>
+              ) : error ? (
+                <div className={styles.error}>{error}</div>
+              ) : inquiries.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>No inquiries received yet.</p>
                 </div>
-              ))}
+              ) : (
+                inquiries.map((inquiry) => (
+                  <div key={inquiry.id} className={styles.inquiryItem}>
+                    <div className={styles.inquiryContent}>
+                      <div className={styles.inquiryHeader}>
+                        <h4 className={styles.inquirerName}>{inquiry.name}</h4>
+                        <span className={styles.inquiryDate}>
+                          {formatDate(inquiry.created_at)}
+                        </span>
+                      </div>
+                      <p className={styles.inquiryProperty}>
+                        Property: {inquiry.property}
+                      </p>
+                      <p className={styles.inquiryMessage}>{inquiry.message}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

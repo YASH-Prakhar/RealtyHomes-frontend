@@ -1,29 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // Import useCallback
 import { useAuth } from "../../contexts/AuthContext";
 import PropertyListingForm from "../common/PropertyListingForm";
 import styles from "../../assets/styles/userDashboard.module.css";
 import PropertyCard from "../common/PropertyCard";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchInquiries } from "../../features/inquirySlice";
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const dispatch = useDispatch();
+  const inquiries = useSelector((state) => state.inquiries.inquiries);
+  const loading = useSelector((state) => state.inquiries.loading);
+  const error = useSelector((state) => state.inquiries.error);
   const [isListingFormOpen, setIsListingFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [myListedProperties, setMyListedProperties] = useState([]);
   const [fetchError, setFetchError] = useState(null);
-  const [inquiries, setInquiries] = useState([]);
-  const [inquiryError, setInquiryError] = useState(null);
-  const [propertyNames, setPropertyNames] = useState({}); // State to store property names
+  const [propertyNames, setPropertyNames] = useState({});
   const navigate = useNavigate();
 
-  // Fetch user's properties and inquiries when component mounts
+  // Fetch property names
   useEffect(() => {
-    fetchUserProperties();
-    fetchUserInquiries();
-  }, []);
+    if (inquiries.length > 0) {
+      fetchPropertyNames(inquiries);
+    }
+  }, [inquiries]);
 
-  const fetchUserProperties = async () => {
+  // Memoize fetchUserProperties
+  const fetchUserProperties = useCallback(async () => {
     try {
       const token = localStorage.getItem("SESSION_TOKEN");
       const response = await axios.get(
@@ -43,30 +49,13 @@ const UserDashboard = () => {
       console.error("Error fetching user properties:", error);
       setFetchError("Failed to load your properties");
     }
-  };
+  }, [user.id]); // Add user.id as a dependency
 
-  const fetchUserInquiries = async () => {
-    try {
-      const token = localStorage.getItem("SESSION_TOKEN");
-      const response = await axios.get(
-        "http://localhost:5000/api/inquiries/my-inquiries",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            user_id: user.id,
-          },
-        }
-      );
-      console.log("Fetched inquiries:", response.data);
-      setInquiries(response.data.inquiries || []);
-      fetchPropertyNames(response.data.inquiries); // Fetch property names based on inquiries
-    } catch (error) {
-      console.error("Error fetching user inquiries:", error);
-      setInquiryError("Failed to load your inquiries");
-    }
-  };
+  // Fetch user's properties and inquiries when component mounts
+  useEffect(() => {
+    fetchUserProperties(); // Call the memoized function
+    dispatch(fetchInquiries(user.id));
+  }, [dispatch, user.id, fetchUserProperties]); // Include fetchUserProperties in the dependency array
 
   const fetchPropertyNames = async (inquiries) => {
     const token = localStorage.getItem("SESSION_TOKEN");
@@ -83,12 +72,11 @@ const UserDashboard = () => {
           })
         )
       );
-      
+
       const names = {};
       responses.forEach((response) => {
-        names[response.data.property.id] = response.data.property.title; // Assuming the response structure
+        names[response.data.property.id] = response.data.property.title;
       });
-      console.log("Fetched property names:", names);
       setPropertyNames(names);
     } catch (error) {
       console.error("Error fetching property names:", error);
@@ -175,7 +163,7 @@ const UserDashboard = () => {
             {isLoading ? "Loading..." : "List New Property"}
           </button>
 
-          <button className={styles.secondaryAction}>
+          <button onClick={() => navigate("/properties")} className={styles.secondaryAction}>
             <svg
               width="16"
               height="16"
@@ -218,12 +206,6 @@ const UserDashboard = () => {
           ) : myListedProperties.length === 0 ? (
             <div className={styles.emptyState}>
               <p>You haven't listed any properties yet.</p>
-              <button
-                className={styles.primaryAction}
-                onClick={() => setIsListingFormOpen(true)}
-              >
-                List Your First Property
-              </button>
             </div>
           ) : (
             myListedProperties.map((property) => (
@@ -256,12 +238,13 @@ const UserDashboard = () => {
       <div className={styles.inquiriesSection}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Recent Inquiries</h2>
-          
         </div>
 
         <div className={styles.inquiriesList}>
-          {inquiryError ? (
-            <div className={styles.error}>{inquiryError}</div>
+          {error ? (
+            <div className={styles.error}>{error}</div>
+          ) : loading ? (
+            <div>Loading inquiries...</div>
           ) : inquiries.length === 0 ? (
             <div className={styles.emptyState}>
               <p>No inquiries received yet.</p>
