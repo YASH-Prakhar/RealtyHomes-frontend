@@ -10,7 +10,7 @@ import BrokerDashboard from './components/dashboards/brokerDashboard';
 import PropertyDetail from "./components/common/PropertyDetail";
 import PropertyDashboard from './components/dashboards/propertyDashboard';
 
-// import Home from './components/Home'; // Uncomment and create Home if needed
+import Home from './components/common/Home'; // Uncomment and create Home if needed
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
         <Router>
           <Navigation />
           <Routes>
-            {/* <Route path="/" element={<Home />} /> */}
+            <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<ProtectedRoute />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
@@ -39,8 +39,15 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/properties" element={<PropertyDashboard />} />
-            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route 
+              path="/properties" 
+              element={
+                <ProtectedRoute>
+                  <PropertyDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/property/:id" element={<ProtectedRoute><PropertyDetail /></ProtectedRoute>} />
           </Routes>
         </Router>
       </AuthProvider>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   brokerProfile,
-  recentActivity,
   recentInquiries,
   monthlyStats,
   statsChanges,
@@ -14,9 +14,11 @@ import axios from "axios";
 
 const BrokerDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // Initialize navigate
   const [isListingFormOpen, setIsListingFormOpen] = useState(false); // State to control form visibility
   const [isLoading, setIsLoading] = useState(false); // State to handle loading
   const [brokerProperties, setBrokerProperties] = useState([]); // State to store broker's properties
+  const [fetchError, setFetchError] = useState(null); // State to handle fetch errors
 
   useEffect(() => {
     fetchBrokerProperties(); // Fetch properties when component mounts
@@ -39,7 +41,12 @@ const BrokerDashboard = () => {
       setBrokerProperties(response.data.properties || []);
     } catch (error) {
       console.error("Error fetching broker properties:", error);
+      setFetchError("Failed to load properties");
     }
+  };
+
+  const handlePropertyClick = (propertyId) => {
+    navigate(`/property/${propertyId}`); // Navigate to the property detail page
   };
 
   const handlePropertySubmit = async (propertyData) => {
@@ -80,43 +87,6 @@ const BrokerDashboard = () => {
     }
   };
 
-  const ActivityIcon = ({ type, color }) => {
-    const icons = {
-      plus: <path d="M12 5v14M5 12h14" stroke={color} strokeWidth="2" />,
-      message: (
-        <path
-          d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-          stroke={color}
-          strokeWidth="2"
-          fill="none"
-        />
-      ),
-      check: (
-        <path d="M20 6L9 17l-5-5" stroke={color} strokeWidth="2" fill="none" />
-      ),
-      reply: (
-        <path
-          d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5M7 6.5h.01"
-          stroke={color}
-          strokeWidth="2"
-          fill="none"
-        />
-      ),
-    };
-
-    return (
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {icons[type] || icons.plus}
-      </svg>
-    );
-  };
-  
   const formatPrice = (price) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -371,51 +341,46 @@ const BrokerDashboard = () => {
           </div>
 
           <div className={styles.propertiesGrid}>
-            {brokerProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={{
-                  id: property.id,
-                  title: property.title,
-                  description: property.description,
-                  price: formatPrice(property.price),
-                  location: property.location,
-                  bedrooms: property.bedrooms,
-                  bathrooms: property.bathrooms,
-                  area: `${property.area_sqft} sq ft`,
-                  image: property.images[0], // Assuming images is an array
-                  type: property.property_type,
-                  status: property.status,
-                  listedDate: formatDate(property.created_at),
-                  features: property.features,
-                }}
-              />
-            ))}
+            {fetchError ? (
+              <div className={styles.error}>{fetchError}</div>
+            ) : brokerProperties.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>You haven't listed any properties yet.</p>
+                <button
+                  className={styles.primaryAction}
+                  onClick={() => setIsListingFormOpen(true)}
+                >
+                  List Your First Property
+                </button>
+              </div>
+            ) : (
+              brokerProperties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={{
+                    id: property.id,
+                    title: property.title,
+                    description: property.description,
+                    price: formatPrice(property.price),
+                    location: property.location,
+                    bedrooms: property.bedrooms,
+                    bathrooms: property.bathrooms,
+                    area: `${property.area_sqft} sq ft`,
+                    image: property.images[0], // Assuming images is an array
+                    type: property.property_type,
+                    status: property.status,
+                    listedDate: formatDate(property.created_at),
+                    features: property.features,
+                  }}
+                  onClick={() => handlePropertyClick(property.id)} // Pass the click handler
+                />
+              ))
+            )}
           </div>
         </div>
 
         {/* Sidebar */}
         <div className={styles.sidebar}>
-          {/* Recent Activity */}
-          {/* <div className={styles.activitySection}>
-            <h3 className={styles.sidebarTitle}>Recent Activity</h3>
-            <div className={styles.activityList}>
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className={styles.activityItem}>
-                  <div
-                    className={styles.activityIcon}
-                    style={{ backgroundColor: `${activity.color}15` }}
-                  >
-                    <ActivityIcon type={activity.icon} color={activity.color} />
-                  </div>
-                  <div className={styles.activityContent}>
-                    <p className={styles.activityTitle}>{activity.title}</p>
-                    <span className={styles.activityTime}>{activity.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div> */}
 
           {/* Recent Inquiries */}
           <div className={styles.inquiriesSection}>
