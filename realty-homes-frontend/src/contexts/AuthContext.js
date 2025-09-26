@@ -17,13 +17,12 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [unauthorizedMessage, setUnauthorizedMessage] = useState('');
 
-  // Check if user is already logged in on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem('SESSION_TOKEN');
       if (token) {
         try {
-          // Verify token with backend
+          
           const response = await axios.get('http://localhost:5000/api/verify', {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -94,11 +93,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('SESSION_TOKEN');
     setUser(null);
     setError(null);
-    // Always ensure reason is a string
+    
     const message = typeof reason === 'string' ? reason : '';
     if (message) {
       setUnauthorizedMessage(message);
-      // Clear the message after 5 seconds
+      
       setTimeout(() => setUnauthorizedMessage(''), 5000);
     }
   };

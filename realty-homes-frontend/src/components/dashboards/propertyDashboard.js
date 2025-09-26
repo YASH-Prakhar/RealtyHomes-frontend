@@ -147,26 +147,6 @@ const PropertyDashboard = () => {
           </select>
         </div>
 
-        {/* Removed Price Range Filter */}
-        {/* <div className={styles.filterSection}>
-          <label>Price Range</label>
-          <div className={styles.priceInputs}>
-            <input
-              type="number"
-              name="minPrice"
-              placeholder="Min"
-              value={filters.minPrice}
-              onChange={handleFilterChange}
-            />
-            <input
-              type="number"
-              name="maxPrice"
-              placeholder="Max"
-              value={filters.maxPrice}
-              onChange={handleFilterChange}
-            />
-          </div>
-        </div> */}
 
         <div className={styles.filterSection}>
           <label>Bedrooms</label>

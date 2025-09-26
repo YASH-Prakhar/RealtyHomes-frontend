@@ -5,7 +5,7 @@ const PropertyCard = ({ property, showOwner = false, onClick }) => (
   <div className={styles.propertyCard} onClick={onClick}>
     <div className={styles.imageContainer}>
       <img
-        src={property.image} // Remove the require() since we're using direct URLs
+        src={property.image} 
         alt={property.title}
         className={styles.propertyImage}
       />

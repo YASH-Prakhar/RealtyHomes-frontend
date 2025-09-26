@@ -46,19 +46,19 @@ const BrokerDashboard = () => {
     }
   }, [user.id]);
 
-  // Fetch broker properties
+  
   useEffect(() => {
     fetchBrokerProperties(); 
     dispatch(fetchInquiries(user.id)); 
   }, [dispatch, user.id, fetchBrokerProperties]); 
 
-  // Calculate dynamic values
+  
   const totalProperties = brokerProperties.length;
   const totalPortfolioValue = brokerProperties.reduce((total, property) => total + parseFloat(property.price), 0); // Convert price to float
   const newInquiries = inquiries.length;
 
   const handlePropertyClick = (propertyId) => {
-    navigate(`/property/${propertyId}`); // Navigate to the property detail page
+    navigate(`/property/${propertyId}`); 
   };
 
   const handlePropertySubmit = async (propertyData) => {
@@ -180,11 +180,11 @@ const BrokerDashboard = () => {
           </div>
           <div className={styles.statContent}>
             <div className={styles.statNumber}>
-              {formatPrice(totalPortfolioValue)} {/* Format the total portfolio value */}
+              {formatPrice(totalPortfolioValue)} 
             </div>
             <div className={styles.statMeta}>
               <span className={styles.statSubtext}>
-                Avg. {formatPrice(totalPortfolioValue / totalProperties || 0)} {/* Average property value */}
+                Avg. {formatPrice(totalPortfolioValue / totalProperties || 0)} 
               </span>
             </div>
           </div>
@@ -328,13 +328,13 @@ const BrokerDashboard = () => {
                     bedrooms: property.bedrooms,
                     bathrooms: property.bathrooms,
                     area: `${property.area_sqft} sq ft`,
-                    image: property.images[0], // Assuming images is an array
+                    image: property.images[0], 
                     type: property.property_type,
                     status: property.status,
                     listedDate: formatDate(property.created_at),
                     features: property.features,
                   }}
-                  onClick={() => handlePropertyClick(property.id)} // Pass the click handler
+                  onClick={() => handlePropertyClick(property.id)} 
                 />
               ))
             )}
@@ -417,8 +417,8 @@ const BrokerDashboard = () => {
       {/* Property Listing Form Modal */}
       <PropertyListingForm
         isOpen={isListingFormOpen}
-        onClose={() => setIsListingFormOpen(false)} // Close the form
-        onSubmit={handlePropertySubmit} // Handle form submission
+        onClose={() => setIsListingFormOpen(false)} 
+        onSubmit={handlePropertySubmit} 
       />
     </div>
   );

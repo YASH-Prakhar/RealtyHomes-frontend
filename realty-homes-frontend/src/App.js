@@ -9,8 +9,7 @@ import UserDashboard from './components/dashboards/userDashboard';
 import BrokerDashboard from './components/dashboards/brokerDashboard';
 import PropertyDetail from "./components/common/PropertyDetail";
 import PropertyDashboard from './components/dashboards/propertyDashboard';
-
-import Home from './components/common/Home'; // Uncomment and create Home if needed
+import Home from './components/common/Home'; 
 
 function App() {
   return (

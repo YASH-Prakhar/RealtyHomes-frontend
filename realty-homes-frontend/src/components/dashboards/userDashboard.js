@@ -28,7 +28,7 @@ const UserDashboard = () => {
     }
   }, [inquiries]);
 
-  // Memoize fetchUserProperties
+  
   const fetchUserProperties = useCallback(async () => {
     try {
       const token = localStorage.getItem("SESSION_TOKEN");
@@ -49,13 +49,13 @@ const UserDashboard = () => {
       console.error("Error fetching user properties:", error);
       setFetchError("Failed to load your properties");
     }
-  }, [user.id]); // Add user.id as a dependency
+  }, [user.id]); 
 
-  // Fetch user's properties and inquiries when component mounts
+  
   useEffect(() => {
-    fetchUserProperties(); // Call the memoized function
+    fetchUserProperties(); 
     dispatch(fetchInquiries(user.id));
-  }, [dispatch, user.id, fetchUserProperties]); // Include fetchUserProperties in the dependency array
+  }, [dispatch, user.id, fetchUserProperties]); 
 
   const fetchPropertyNames = async (inquiries) => {
     const token = localStorage.getItem("SESSION_TOKEN");
