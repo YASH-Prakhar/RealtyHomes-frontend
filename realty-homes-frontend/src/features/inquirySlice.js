@@ -7,27 +7,27 @@ const initialState = {
   error: null,
 };
 
-// Async thunk for fetching inquiries
+
 export const fetchInquiries = createAsyncThunk(
   "inquiries/fetchInquiries",
   async (userId) => {
-    const token = localStorage.getItem("SESSION_TOKEN"); // Get the token
+    const token = localStorage.getItem("SESSION_TOKEN"); 
     const response = await axios.get(
-      "http://localhost:5000/api/inquiries/my-inquiries", // Updated endpoint
+      "http://localhost:5000/api/inquiries/my-inquiries", 
       {
         headers: {
-          Authorization: `Bearer ${token}`, // Include token in headers
+          Authorization: `Bearer ${token}`, 
         },
         params: {
-          user_id: userId, // Pass user ID as a parameter
+          user_id: userId, 
         },
       }
     );
-    return response.data; // Assuming the response contains the inquiries
+    return response.data; 
   }
 );
 
-// Async thunk for adding an inquiry
+
 export const addInquiry = createAsyncThunk(
   "inquiries/addInquiry",
   async (inquiryData) => {
@@ -42,7 +42,7 @@ export const addInquiry = createAsyncThunk(
         },
       }
     );
-    return response.data; // Assuming the response contains the added inquiry
+    return response.data; 
   }
 );
 
@@ -57,14 +57,14 @@ const inquirySlice = createSlice({
       })
       .addCase(fetchInquiries.fulfilled, (state, action) => {
         state.loading = false;
-        state.inquiries = action.payload.inquiries || []; // Ensure to access inquiries correctly
+        state.inquiries = action.payload.inquiries || []; 
       })
       .addCase(fetchInquiries.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
       .addCase(addInquiry.fulfilled, (state, action) => {
-        state.inquiries.push(action.payload); // Add the new inquiry to the state
+        state.inquiries.push(action.payload); 
       });
   },
 });

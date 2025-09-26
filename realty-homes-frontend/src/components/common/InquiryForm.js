@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux"; // Import useDispatch
-import { addInquiry } from "../../features/inquirySlice"; // Import the addInquiry thunk
+import { useDispatch } from "react-redux";
+import { addInquiry } from "../../features/inquirySlice"; 
 import styles from "../../assets/styles/InquiryForm.module.css";
 
 const InquiryForm = ({ isOpen, onClose, property }) => {
-  const dispatch = useDispatch(); // Initialize dispatch
+  const dispatch = useDispatch(); 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,7 +35,7 @@ const InquiryForm = ({ isOpen, onClose, property }) => {
         property_id: property.id,
         owner_id: property.owner_id,
       };
-      await dispatch(addInquiry(inquiryData)); // Dispatch the addInquiry thunk
+      await dispatch(addInquiry(inquiryData)); 
       alert("Inquiry sent successfully!");
       setFormData({
         name: "",
